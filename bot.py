@@ -15,7 +15,12 @@ from tgbot.handlers.admin import register_admin
 from tgbot.handlers.user import register_user
 from tgbot.handlers.add_info import register_info
 from tgbot.handlers.echo import register_echo
+from tgbot.middlewares.throttling import ThrottlingMiddleware
 from tgbot.misc.set_bot_commands import set_default_commands
+
+
+def register_all_middlewares(dp):
+    dp.setup_middleware(ThrottlingMiddleware())
 
 
 def register_all_filters(dp):
@@ -48,6 +53,7 @@ async def main():
 
     bot['config'] = config
 
+    register_all_middlewares(dp)
     register_all_filters(dp)
     await set_default_commands(dp)
     register_all_handlers(dp)
