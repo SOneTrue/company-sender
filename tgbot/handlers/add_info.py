@@ -134,37 +134,26 @@ async def add_find_us(message: Message, state: FSMContext):
 
 
 async def add_send_comments(message: Message, state: FSMContext):
-    user_data = await state.get_data()
-    name_user = user_data['name_user']
-    data_order = user_data['data_order']
-    time_car = user_data['time_car']
-    address_car = user_data['address_car']
-    address_site = user_data['address_site']
-    comments_site = user_data['comments_site']
-    time_end = user_data['time_end']
-    quantity_people = user_data['quantity_people']
-    age = user_data['age']
-    phone_number = user_data['phone_number']
-    others_options = user_data['others_options']
-    find_us = message.text
-    number_order = random.randint(1, 10000)
     if not message.text == '/start':
+        number_order = random.randint(1, 10000)
         await message.answer(f'Успешно заполнено, ваш уникальный номер заказа <b>№ {number_order}</b>.')
+        user_data = await state.get_data()
         text_user = f'Заказ <b>№ {number_order}</b>. \n' \
-                    f'Имя заказчика: {name_user}\n' \
-                    f'Дата заказа: {data_order}\n' \
-                    f'Время подачи: {time_car}\n' \
-                    f'Адрес подачи: {address_car}\n' \
-                    f'Адрес места назначения: {address_site}\n' \
-                    f'Уточнения по маршруту: {comments_site}\n' \
-                    f'Время окончания заказа: {time_end}\n' \
-                    f'Количество пассажиров: {quantity_people}\n' \
-                    f'Дети или взрослые: {age}\n' \
-                    f'Номер телефона: {phone_number}\n' \
-                    f'Дополнительные опции: {others_options}\n' \
-                    f'Откуда о нас узнали: {find_us}'
+                    f'Имя заказчика: {user_data["name_user"]}\n' \
+                    f'Дата заказа: {user_data["data_order"]}\n' \
+                    f'Время подачи: {user_data["time_car"]}\n' \
+                    f'Адрес подачи: {user_data["address_car"]}\n' \
+                    f'Адрес места назначения: {user_data["address_site"]}\n' \
+                    f'Уточнения по маршруту: {user_data["comments_site"]}\n' \
+                    f'Время окончания заказа: {user_data["time_end"]}\n' \
+                    f'Количество пассажиров: {user_data["quantity_people"]}\n' \
+                    f'Дети или взрослые: {user_data["age"]}\n' \
+                    f'Номер телефона: {user_data["phone_number"]}\n' \
+                    f'Дополнительные опции: {user_data["others_options"]}\n' \
+                    f'Откуда о нас узнали: {message.text}'
         await bot.send_message(chat_id=config.tg_bot.group, text=text_user)
-        await state.reset_state(with_data=False)
+        await state.reset_state(with_data=True)
+        await state.finish()
     else:
         await message.answer("Вы начали заново - Имя для дальнейшей работы.")
         await Name.send_name.set()
