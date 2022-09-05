@@ -173,4 +173,4 @@ def register_info(dp: Dispatcher):
     dp.register_message_handler(add_phone_number, state=Name.send_age)
     dp.register_message_handler(add_others_options, state=Name.send_phone_number)
     dp.register_message_handler(add_find_us, state=Name.send_others_options)
-    dp.register_message_handler(add_send_comments, rate_limit(10), state=Name.send_find_us, )
+    dp.register_message_handler(add_send_comments, state=Name.send_find_us, )

@@ -7,29 +7,12 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.utils.exceptions import Throttled
 
 
-def rate_limit(limit: int, key=None):
-    """
-    Decorator for configuring rate limit and key in different functions.
-    :param limit:
-    :param key:
-    :return:
-    """
-
-    def decorator(func):
-        setattr(func, 'throttling_rate_limit', limit)
-        if key:
-            setattr(func, 'throttling_key', key)
-        return func
-
-    return decorator
-
-
 class ThrottlingMiddleware(BaseMiddleware):
     """
     Simple middleware
     """
 
-    def __init__(self, limit=1, key_prefix='antiflood_'):
+    def __init__(self, limit=3, key_prefix='antiflood_'):
         self.rate_limit = limit
         self.prefix = key_prefix
         super(ThrottlingMiddleware, self).__init__()
@@ -80,7 +63,7 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         # Prevent flooding
         if throttled.exceeded_count <= 2:
-            await message.reply('Много запросов, пожалуйста подождите! ')
+            await message.reply('Чат заблокирован, слишком много запросов, вы не можете писать 3 секунды! ')
 
         # Sleep.
         await asyncio.sleep(delta)
@@ -90,5 +73,4 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         # If current message is not last with current key - do not send message
         if thr.exceeded_count == throttled.exceeded_count:
-            await message.reply('Разблокированно.')
-
+            await message.reply('Чат успешно разблокирован.')
