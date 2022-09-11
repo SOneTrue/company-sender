@@ -6,7 +6,6 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
 from tgbot.config import load_config
-from tgbot.middlewares.throttling import rate_limit
 from tgbot.misc.states import Name
 
 config = load_config(".env")
@@ -129,6 +128,28 @@ async def add_find_us(message: Message, state: FSMContext):
         others_options = message.text
         await state.update_data(others_options=others_options)
         await message.answer(f'Откуда о нас узнали?')
+        await Name.send_payment.set()
+    else:
+        await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
+        await Name.send_name.set()
+
+
+async def add_payment(message: Message, state: FSMContext):
+    if not message.text == '/start':
+        payment = message.text
+        await state.update_data(payment=payment)
+        await message.answer(f'Способ оплаты?')
+        await Name.send_quantity_order.set()
+    else:
+        await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
+        await Name.send_name.set()
+
+
+async def add_quantity_order(message: Message, state: FSMContext):
+    if not message.text == '/start':
+        quantity_order = message.text
+        await state.update_data(quantity_order=quantity_order)
+        await message.answer(f'Количество часов заказа?')
         await Name.send_find_us.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -154,8 +175,13 @@ async def add_send_comments(message: Message, state: FSMContext):
                     f'Дополнительные опции: {user_data["others_options"]}\n' \
                     f'Откуда о нас узнали: {message.text}'
         await bot.send_message(chat_id=config.tg_bot.group, text=text_user)
+
+        text_group = f'Имя заказчика: {user_data["name_user"]}\n' \
+                     f'Номер телефона: {user_data["phone_number"]}\n' \
+                     f'Оплата: {user_data["payment"]}\n' \
+                     f'Количество часов заказа: {user_data["quantity_order"]}'
+        await bot.send_message(chat_id=config.tg_bot.group, text=text_group)
         await state.reset_state(with_data=True)
-        await state.finish()
     else:
         await message.answer("Вы начали заново - Имя для дальнейшей работы.")
         await Name.send_name.set()
@@ -173,4 +199,6 @@ def register_info(dp: Dispatcher):
     dp.register_message_handler(add_phone_number, state=Name.send_age)
     dp.register_message_handler(add_others_options, state=Name.send_phone_number)
     dp.register_message_handler(add_find_us, state=Name.send_others_options)
-    dp.register_message_handler(add_send_comments, state=Name.send_find_us, )
+    dp.register_message_handler(add_payment, state=Name.send_payment)
+    dp.register_message_handler(add_quantity_order, state=Name.send_quantity_order)
+    dp.register_message_handler(add_send_comments, state=Name.send_find_us)
