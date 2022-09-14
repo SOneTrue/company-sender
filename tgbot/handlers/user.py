@@ -8,7 +8,7 @@ from tgbot.misc.states import Name
 
 async def user_start(message: Message, state: FSMContext):
     await state.reset_state(with_data=True)
-    await message.answer("Здравствуйте, введите Имя.")
+    await message.answer("Здравствуйте, введите имя заказчика.")
     await Name.send_name.set()
 
 
