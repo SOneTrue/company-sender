@@ -12,6 +12,7 @@ class Name(StatesGroup):
     send_quantity_people = State()
     send_age = State()
     send_comments = State()
+    send_personal_info = State()
     send_others_options = State()
     send_phone_number = State()
     send_find_us = State()
