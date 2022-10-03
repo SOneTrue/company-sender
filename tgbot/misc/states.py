@@ -16,5 +16,4 @@ class Name(StatesGroup):
     send_others_options = State()
     send_phone_number = State()
     send_find_us = State()
-    send_quantity_order = State()
     send_payment = State()

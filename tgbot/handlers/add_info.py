@@ -6,6 +6,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 
 from tgbot.config import load_config
+from tgbot.keyboards.reply import old_years, orders
 from tgbot.misc.states import Name
 
 config = load_config(".env")
@@ -15,7 +16,8 @@ bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
 async def add_user_name(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(name_user=message.text)
-        await message.answer(f'Дата заказа?')
+        await message.answer(f'Дата заказа?\n'
+                             f'Формат - дд.мм.гг.')
         await Name.send_date_order.set()
     else:
         await message.answer("⛔️Не верное имя или неправильно заполнено поле, повторите ввод ФИО!")
@@ -25,7 +27,8 @@ async def add_user_name(message: Message, state: FSMContext):
 async def add_date_order(message: Message, state: FSMContext):
     if message.text != '/start':
         await state.update_data(data_order=message.text)
-        await message.answer(f'Время подачи транспорта?')
+        await message.answer(f'Время подачи транспорта?\n'
+                             f'Формат - чч.мм.')
         await Name.send_time_order.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -35,7 +38,8 @@ async def add_date_order(message: Message, state: FSMContext):
 async def add_address_start(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(time_car=message.text)
-        await message.answer(f'Адрес подачи транспорта?')
+        await message.answer(f'Адрес подачи транспорта?\n'
+                             f'Формат - Город, улица, дом если есть. Ссылка отметки на карте, (по возможности)')
         await Name.send_address_start.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -45,7 +49,8 @@ async def add_address_start(message: Message, state: FSMContext):
 async def add_address_end(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(address_start=message.text)
-        await message.answer(f'Адрес места назначения?')
+        await message.answer(f'Адрес места назначения?\n'
+                             f'Формат - Город, улица, дом если есть. Ссылка отметки на карте, (по возможности).')
         await Name.send_address_end.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -55,7 +60,8 @@ async def add_address_end(message: Message, state: FSMContext):
 async def add_time_end(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(address_end=message.text)
-        await message.answer(f'Время окончания заказа?')
+        await message.answer(f'Время окончания заказа?\n'
+                             f'Формат - чч.мм.')
         await Name.send_time_end.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -75,7 +81,7 @@ async def add_quantity_people(message: Message, state: FSMContext):
 async def add_age(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(quantity_people=message.text)
-        await message.answer(f'Дети или взрослые?')
+        await message.answer(f'Дети или взрослые?', reply_markup=old_years)
         await Name.send_age.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -84,9 +90,11 @@ async def add_age(message: Message, state: FSMContext):
 
 async def add_comments(message: Message, state: FSMContext):
     if not message.text == '/start':
+        reply_markup = types.ReplyKeyboardRemove()
         await state.update_data(age=message.text)
         await message.answer(
-            f'Уточнения по маршруту (здесь вы можете указать остановочные пункты или места куда еще надо заехать)?')
+            f'Примечания по маршруту (здесь вы можете указать остановочные пункты или места куда еще надо заехать)?',
+            reply_markup=reply_markup)
         await Name.send_comments.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -106,7 +114,8 @@ async def add_others_options(message: Message, state: FSMContext):
 async def add_personal_info(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(others_options=message.text)
-        await message.answer(f'Контактное лицо?')
+        await message.answer(f'Контактное лицо?\n'
+                             f'Формат - Имя, Фамилия.')
         await Name.send_others_options.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -116,7 +125,8 @@ async def add_personal_info(message: Message, state: FSMContext):
 async def add_phone_number(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(personal_info=message.text)
-        await message.answer(f'Номер телефона, с кем связаться по заказу?')
+        await message.answer(f'Номер телефона, с кем связаться по заказу?\n'
+                             f'Формат - +7(9хх)ххх-хх-хх')
         await Name.send_phone_number.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -133,20 +143,11 @@ async def add_find_us(message: Message, state: FSMContext):
         await Name.send_name.set()
 
 
-async def add_quantity_order(message: Message, state: FSMContext):
-    if not message.text == '/start':
-        await state.update_data(find_us=message.text)
-        await message.answer(f'Количество часов заказа?')
-        await Name.send_quantity_order.set()
-    else:
-        await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
-        await Name.send_name.set()
-
 
 async def add_payment(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(times_order=message.text)
-        await message.answer(f'Способ оплаты?')
+        await message.answer(f'Способ оплаты?', reply_markup=orders)
         await Name.send_payment.set()
     else:
         await message.answer("Вы начали заново - введите Имя для дальнейшей работы.")
@@ -155,8 +156,9 @@ async def add_payment(message: Message, state: FSMContext):
 
 async def send_group_info(message: Message, state: FSMContext):
     if not message.text == '/start':
-        number_order = random.randint(1, 10000)
-        await message.answer(f'Успешно заполнено, ваш уникальный номер заказа <b>№ {number_order}</b>.')
+        reply_markup = types.ReplyKeyboardRemove()
+        number_order = random.randint(10000, 10000000)
+        await message.answer(f'Успешно заполнено, ваш уникальный номер заказа <b>№ {number_order}</b>.', reply_markup=reply_markup)
         user_data = await state.get_data()
         text_user = f'Заказ <b>№ {number_order}</b>. \n' \
                     f'Заказчик: {user_data["name_user"]}\n' \
@@ -173,7 +175,6 @@ async def send_group_info(message: Message, state: FSMContext):
 
         text_group = f'Контактное лицо: {user_data["personal_info"]}\n' \
                      f'Номер телефона: {user_data["phone_number"]}\n' \
-                     f'Откуда о нас узнали: {user_data["find_us"]}\n' \
                      f'Количество часов заказа: {user_data["times_order"]}\n' \
                      f'Оплата: {message.text}\n'
         await bot.send_message(chat_id=config.tg_bot.group, text=text_group)
@@ -196,6 +197,5 @@ def register_info(dp: Dispatcher):
     dp.register_message_handler(add_personal_info, state=Name.send_personal_info)
     dp.register_message_handler(add_phone_number, state=Name.send_others_options)
     dp.register_message_handler(add_find_us, state=Name.send_phone_number)
-    dp.register_message_handler(add_quantity_order, state=Name.send_find_us)
-    dp.register_message_handler(add_payment, state=Name.send_quantity_order)
+    dp.register_message_handler(add_payment, state=Name.send_find_us)
     dp.register_message_handler(send_group_info, state=Name.send_payment)
