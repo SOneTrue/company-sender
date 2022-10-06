@@ -143,7 +143,6 @@ async def add_find_us(message: Message, state: FSMContext):
         await Name.send_name.set()
 
 
-
 async def add_payment(message: Message, state: FSMContext):
     if not message.text == '/start':
         await state.update_data(times_order=message.text)
@@ -155,10 +154,11 @@ async def add_payment(message: Message, state: FSMContext):
 
 
 async def send_group_info(message: Message, state: FSMContext):
-    if not message.text == '/start':
+    if not message.text == '/start' and message.text == 'По карте':
         reply_markup = types.ReplyKeyboardRemove()
         number_order = random.randint(10000, 10000000)
-        await message.answer(f'Успешно заполнено, ваш уникальный номер заказа <b>№ {number_order}</b>.', reply_markup=reply_markup)
+        await message.answer(f'Успешно заполнено, ваш уникальный номер заказа <b>№ {number_order}</b>.',
+                             reply_markup=reply_markup)
         user_data = await state.get_data()
         text_user = f'Заказ <b>№ {number_order}</b>. \n' \
                     f'Заказчик: {user_data["name_user"]}\n' \
@@ -177,6 +177,42 @@ async def send_group_info(message: Message, state: FSMContext):
                      f'Номер телефона: {user_data["phone_number"]}\n' \
                      f'Количество часов заказа: {user_data["times_order"]}\n' \
                      f'Оплата: {message.text}\n'
+        await bot.send_message(chat_id=config.tg_bot.group, text=text_group)
+        await state.reset_state(with_data=True)
+    elif message.text == 'По счёту':
+        await state.update_data(order_text=message.text)
+        await message.answer(f'Ваш ИНН?')
+        await Name.send_inn.set()
+    else:
+        await message.answer("Вы начали заново - Имя для дальнейшей работы.")
+        await Name.send_name.set()
+
+
+async def send_inn_user(message: Message, state: FSMContext):
+    if not message.text == '/start':
+        reply_markup = types.ReplyKeyboardRemove()
+        number_order = random.randint(10000, 10000000)
+        await message.answer(f'Успешно заполнено, ваш уникальный номер заказа <b>№ {number_order}</b>.',
+                             reply_markup=reply_markup)
+        user_data = await state.get_data()
+        text_user = f'Заказ <b>№ {number_order}</b>. \n' \
+                    f'Заказчик: {user_data["name_user"]}\n' \
+                    f'Дата: {user_data["data_order"]}\n' \
+                    f'Время выезда: {user_data["time_car"]}\n' \
+                    f'Откуда: {user_data["address_start"]}\n' \
+                    f'Куда: {user_data["address_end"]}\n' \
+                    f'Время окончания заказа: {user_data["time_end"]}\n' \
+                    f'Количество пассажиров: {user_data["quantity_people"]}\n' \
+                    f'Дети или взрослые: {user_data["age"]}\n' \
+                    f'Уточнения по маршруту: {user_data["comments"]}\n' \
+                    f'Дополнительные опции: {user_data["others_options"]}\n'
+        await bot.send_message(chat_id=config.tg_bot.group, text=text_user)
+
+        text_group = f'Контактное лицо: {user_data["personal_info"]}\n' \
+                     f'Номер телефона: {user_data["phone_number"]}\n' \
+                     f'Количество часов заказа: {user_data["times_order"]}\n' \
+                     f'Оплата: {user_data["order_text"]}\n' \
+                     f'ИНН: {message.text}'
         await bot.send_message(chat_id=config.tg_bot.group, text=text_group)
         await state.reset_state(with_data=True)
     else:
@@ -199,3 +235,4 @@ def register_info(dp: Dispatcher):
     dp.register_message_handler(add_find_us, state=Name.send_phone_number)
     dp.register_message_handler(add_payment, state=Name.send_find_us)
     dp.register_message_handler(send_group_info, state=Name.send_payment)
+    dp.register_message_handler(send_inn_user, state=Name.send_inn)

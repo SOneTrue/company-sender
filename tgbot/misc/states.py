@@ -17,3 +17,4 @@ class Name(StatesGroup):
     send_phone_number = State()
     send_find_us = State()
     send_payment = State()
+    send_inn = State()
